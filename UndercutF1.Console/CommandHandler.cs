@@ -1,8 +1,8 @@
 using InMemLogger;
-using UndercutF1.Data;
 using Serilog;
 using Serilog.Events;
 using TextCopy;
+using UndercutF1.Data;
 
 namespace UndercutF1.Console;
 
@@ -16,9 +16,7 @@ public static partial class CommandHandler
         bool useConsoleLogging = false
     )
     {
-        var builder = WebApplication.CreateEmptyBuilder(
-            new() { ApplicationName = "undercutf1" }
-        );
+        var builder = WebApplication.CreateEmptyBuilder(new() { ApplicationName = "undercutf1" });
 
         var commandLineOpts = new Dictionary<string, string?>();
         if (isVerbose)

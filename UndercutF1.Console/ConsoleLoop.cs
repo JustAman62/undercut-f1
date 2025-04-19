@@ -42,7 +42,10 @@ public class ConsoleLoop(
         {
             stopwatch.Restart();
 
+            logger.LogDebug("Buffer setup");
+
             await SetupBufferAsync(cancellationToken);
+            logger.LogDebug("handle inputs");
             await HandleInputsAsync(cancellationToken);
 
             if (state.CurrentScreen == Screen.Shutdown)
@@ -71,6 +74,14 @@ public class ConsoleLoop(
                 UpdateInputFooter(layout);
 
                 var output = AnsiConsole.Console.ToAnsi(layout).Replace("\n", "");
+                // For some reason ToAnsi doesn't use Environment.NewLine correctly.
+                // On Windows, it outputs only CR's and no LF, so only a single line ends up output in the terminal
+                // So now we manually deal with this
+                if (OperatingSystem.IsWindows())
+                {
+                    output = output.Replace("\r", Environment.NewLine);
+                }
+
                 if (_previousDraw != output)
                 {
                     await Terminal.OutAsync(output, cancellationToken);
@@ -165,9 +176,10 @@ public class ConsoleLoop(
         try
         {
             // wait for a very short amount of time to read input
-            var cts = new CancellationTokenSource(millisecondsDelay: 5);
+            var cts = new CancellationTokenSource(millisecondsDelay: 50);
 
             await Terminal.ReadAsync(inputBuffer, cts.Token);
+            logger.LogDebug("Read in input: {Input}", string.Join(',', inputBuffer));
 
             if (TryParseRawInput(inputBuffer, out var keyChar, out var consoleKey))
             {
