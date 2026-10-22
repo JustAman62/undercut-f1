@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace UndercutF1.Data;
 
@@ -30,11 +31,16 @@ public static partial class ServiceCollectionExtensions
 
         collection.AddHttpClient(
             "Default",
-            options =>
+            (serviceProvider, options) =>
             {
                 options.DefaultRequestHeaders.Add(
                     "User-Agent",
                     $"undercut-f1/{ThisAssembly.AssemblyInformationalVersion}"
+                );
+                var formula1Account = serviceProvider.GetRequiredService<Formula1Account>();
+                options.DefaultRequestHeaders.Add(
+                    "Authorization",
+                    $"Bearer {formula1Account.AccessToken}"
                 );
             }
         );
