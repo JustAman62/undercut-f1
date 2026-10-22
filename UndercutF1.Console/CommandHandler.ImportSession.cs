@@ -22,6 +22,25 @@ public static partial class CommandHandler
         );
         var app = builder.Build();
         var importer = app.Services.GetRequiredService<IDataImporter>();
+        var formula1Account = app.Services.GetRequiredService<Formula1Account>();
+
+        if (formula1Account.IsAuthenticated != Formula1Account.AuthenticationResult.Success)
+        {
+            AnsiConsole.Write(
+                new Text(
+                    $"""
+                    Importing sessions now requires logging in with your F1TV/Formula1 account.
+                    Please authenticate first by running 'undercutf1 login'.
+
+                    Tokens expire after a week, so even if you've logged in previously you may need to login again now.
+
+                    Current token status: {formula1Account.IsAuthenticated}
+                    """,
+                    Color.Red
+                )
+            );
+            return;
+        }
 
         if (!meetingKey.HasValue)
         {
